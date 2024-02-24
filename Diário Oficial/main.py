@@ -90,7 +90,7 @@ for i in range(96,numberPages):
         button.click();
 
 
-gerarArquivo.CSV(dadosTabela,download_dir);
+gerarArquivo.criarCSV(dadosTabela, download_dir);
 # Fechar o navegador
 driver.quit()
 

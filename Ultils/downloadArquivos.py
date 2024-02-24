@@ -23,10 +23,10 @@ def link(link,file_dir):
                 with open(file_path, 'wb') as f:
                     f.write(response.content)
 
-                #print(f"Baixado com sucesso \n")
+                #print(f"\n\n\t\tBaixado com sucesso \n")
                 return {'status Donwload':"Sucesso"}
             else:
-                print(f"\n\n\t\tErro ao baixar o arquivo do link '{link}': Código de status {response.status_code}")
+                print(f"\n\n\t\tErro na Resposta do link '{link}': Código de status {response.status_code}")
                 return {'status Donwload':"Erro na Resposta do link"}
         except Exception as e:
             print(f"\n\n\t\tErro ao baixar o arquivo do link '{link}': {e}")

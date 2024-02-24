@@ -1,15 +1,17 @@
 from selenium import webdriver
-from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 import time
-import requests
 import os
+from Ultils import gerarArquivo
 
-linkPortal = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";
+linkPortal = "https://transparencia.balsas.ma.gov.br/acessoInformacao/contratos/contratos/detalhes/113748";
 nomePortal = "Mirador";
 tipoPortal = "PM";
 tipoArquivosDownloads = "Licitações";
+# Caminho do arquivo CSV
+caminho_arquivo = ""+tipoArquivosDownloads+".csv"
 
+data={}
 # Criar uma pasta para os downloads (se ela ainda não existir)
 download_dir = 'Downloads-'+nomePortal+'-'+tipoPortal+'-'+tipoArquivosDownloads;
 if not os.path.exists(download_dir):
@@ -36,21 +38,33 @@ soup = BeautifulSoup(html, "html.parser")
 selectDivs = soup.select('.form-group')
 
 for input in selectDivs:
+    if (input.find("label")):
+        if (input.find("input")):
+            print("Chave:",input.find("label").text)
+            print("Valor: ",input.find("input")["value"])
+            value = input.find("input")["value"]
+            chave = input.find("label").text
 
-    if (input.find("input")):
-        print("Chave:", input.find("label").text)
-        print("Valor: ",input.find("input")["value"])
+            #salvando
+            data[chave] = []
+            data[chave].append(value)
+        else:
+            print("")
     else:
-        print("")
+        print('\nElemento diferente de um input')
+
 ##Dados que não seguem o mesmo padrão no HTML
-    #Natureza de despesa:
     #Objeto:
-naturezaDespesa = soup.select('.col-md-2+ .col-md-12')
-objeto = soup.select('.col-md-4+ .col-md-12')
+objeto = soup.select('.col-md-12:nth-child(11)')
 
-print(naturezaDespesa[0].find("label").text, naturezaDespesa[0].find("textarea").text)
-print(objeto[0].find("label").text, objeto[0].find("textarea").text)
+value = objeto[0].find("textarea").text
+chave = objeto[0].find("label").text
 
+data[chave] = []
+data[chave].append(value)
+
+#Criar tabela
+gerarArquivo.criarCSV(data, 'detalhes da licitação')
 # Fechar o navegador
 driver.quit()
 
