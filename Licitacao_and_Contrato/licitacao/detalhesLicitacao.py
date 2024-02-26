@@ -7,6 +7,10 @@ import time
 import os
 import re
 
+
+# Registra o tempo de início
+inicio = time.perf_counter()
+
 def mostrarDetalhe(driver,directoryInformation,link):
     dadosTabela = {}
 
@@ -58,7 +62,6 @@ def mostrarDetalhe(driver,directoryInformation,link):
     dadosTabela[chaveObjeto] = []
     dadosTabela[chaveObjeto].append(valorObjeto)
 
-    url = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499"
 
     # Use uma expressão regular para encontrar o número na URL
     numeroDoLink = re.search(r'(\d+)$', link).group(1)
@@ -76,14 +79,21 @@ def mostrarDetalhe(driver,directoryInformation,link):
     gerarArquivo.editarCSV(dadosTabela, directoryInformation["licitacaoFolder"]+'/Todas as licitações')
     #time.sleep(2)
     print("Acessando: ",link)
+
     tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder);
 
+    fim = time.perf_counter()
+    tempo_total = fim - inicio
+
+    print("tempo de execução", tempo_total)
 
 
 
+'''
 def runMostrarDetalhe():
-    '''
-    link = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";
+
+    #link = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";
+    link="https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136323"
     nomePortal = "Mirador";
     tipoPortal = "PM";
 
@@ -100,9 +110,9 @@ def runMostrarDetalhe():
     mostrarDetalhe(driver, directoryInformation, link)
     # Fechar o navegador
     driver.quit()
-    '''
-#runMostrarDetalhe();
 
+runMostrarDetalhe();
+'''
 
 
 
