@@ -68,7 +68,7 @@ def mostrarDetalhe(driver,directoryInformation,link):
     # Numero do processo
     numberProcesso = dadosTabela['Nº Processo '][0]
     numberProcesso = numberProcesso.replace('/', '-').replace(':', '.') #remover barra e dois
-    namefolder = directoryInformation["licitacaoFolder"] +"/"+ "Nº "+ numberProcesso +"  ID - "+numeroDoLink
+    namefolder = directoryInformation["licitacaoFolder"] +"/"+ "Nº "+ numberProcesso +"  ID-"+numeroDoLink
 
 
     # Criar uma pasta para cada licitação
@@ -80,7 +80,7 @@ def mostrarDetalhe(driver,directoryInformation,link):
     #time.sleep(2)
     print("Acessando: ",link)
 
-    tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder);
+    tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder)
 
     fim = time.perf_counter()
     tempo_total = fim - inicio
@@ -89,7 +89,7 @@ def mostrarDetalhe(driver,directoryInformation,link):
 
 
 
-'''
+
 def runMostrarDetalhe():
 
     #link = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";
@@ -103,16 +103,22 @@ def runMostrarDetalhe():
     }
 
     # Criar uma nova instância do driver do Chrome
-    driver = webdriver.Chrome()
 
-    # Definir o tamanho da janela
+    driver = webdriver.Chrome()
     driver.set_window_size(800, 600);
-    mostrarDetalhe(driver, directoryInformation, link)
+
+    driver.get(link)
+
+    driver2 = webdriver.Chrome()
+    time.sleep(2)
+    driver2.get(link)
+
+    #mostrarDetalhe(driver, directoryInformation, link)
     # Fechar o navegador
     driver.quit()
 
-runMostrarDetalhe();
-'''
+#runMostrarDetalhe();
+
 
 
 

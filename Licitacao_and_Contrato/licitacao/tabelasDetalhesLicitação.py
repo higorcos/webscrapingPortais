@@ -42,13 +42,11 @@ def verificarSeExisteTabelas(soup,directory=''):
 
     if 'Licitantes' in tablesObj:
         print('\tPossui Licitantes')
-
-    return []
-
 def andamentos(table,directory):
     print("\tDownload arquivos de andamento da Licitação")
 
     # Criar uma pasta para os downloads (se ela ainda não existir)
+    parentDirectory = directory
     directory = directory+"/Andamento"
     global directoryGlobal
     directoryGlobal = directory
@@ -74,14 +72,23 @@ def andamentos(table,directory):
     #print("\t--------------",directoryGlobal)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        cods = executor.map(pecorrerLinhasAndamentos, lines)
+        result = executor.map(pecorrerLinhasAndamentos, lines)
+
+        for dados in result:
+            dadosTabela[title0].append(dados[0])
+            dadosTabela[title1].append(dados[1])
+            dadosTabela[title2].append(dados[2])
+            dadosTabela[title3].append(dados[3])
+            dadosTabela["status"].append(dados[4])
+
     print("\t-------Baixou Arquivos")
+    print(directory)
+    gerarArquivo.criarCSV(dadosTabela, parentDirectory+"/Detalhes andamento");
 
     #sequencial
     #for i in range(0, lines.__len__()):
         #pecorrerLinhasAndamentos(lines[i])
     #gerarArquivo.criarCSV(dadosTabela, directory);
-
 def pecorrerLinhasAndamentos(lines):
 
     colums = lines.find_all()
@@ -90,41 +97,24 @@ def pecorrerLinhasAndamentos(lines):
     colum2 = colums[2].text  # data
     colum3 = colums[3].find('a').get('href')  # link
     link = colum3
-
     #print("\t"+colum0, colum1, colum2, colum3)
-    # print("\tTIPO: " +  colum0 );
 
     print("\tLINK:" + colum3);
 
     # Criar uma pasta individual para o arquivo baixado dentro da pasta de downloads
-    number0 = '0'
     dateFileNewFormat = colum2.replace('/', '-').replace(':', '-')  # remover barra e dois pontos
-    # newDir = "TIPO " +  colum0 + " DESCRICAO " +  colum1 + " DATA "+dateFileNewFormat + "" +number0
-    #newDir = "TIPO " + colum0 + " " + number0
     newDir = "TIPO " + colum0 + " " + dateFileNewFormat
 
     file_dir = os.path.join(directoryGlobal, newDir)
-    # time.sleep(1)
 
-    # Verificar se encontrou a tag <a>
+    # Verificar se tem link
     if link:
         statusDonwload = downloadArquivos.link(link, file_dir)
     else:
         print("\tLink não encontrado")
         statusDonwload = {'status Donwload': "Link não foi passado"}
 
-    # print("\tTIPO: " +  colum0 + " DESCRICAO: " +  colum1 + " DATA ENVIO: " +colum2 + " LINK: "+ colum3 + ' Status: ', statusDonwload['status Donwload']);
-    # print("\tTIPO: " +  colum0 + ' Status: ', statusDonwload['status Donwload']);
-
-    '''
-    dadosTabela[title0].append(colum0)
-    dadosTabela[title1].append(colum1)
-    dadosTabela[title2].append(colum2)
-    dadosTabela[title3].append(colum3)
-    dadosTabela["status"].append(statusDonwload['status Donwload'])
-    # dadosTabela["status"].append("ERRO")
-    '''
-
+    return [colum0,colum1,colum2,link,statusDonwload['status Donwload']]
 def contratos(link):
 
     from selenium.webdriver.chrome.options import Options
@@ -153,7 +143,6 @@ def contratos(link):
     verificarSeExisteTabelas(soup)
         # Fechar o navegador
     driver.quit()
-
 '''
 links = [
    "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136437",
