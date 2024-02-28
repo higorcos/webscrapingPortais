@@ -4,9 +4,11 @@ from bs4 import BeautifulSoup
 import time
 import os
 from Ultils import gerarArquivo, downloadArquivos
+from Licitacao_and_Contrato.contrato import detalhesContrato
 import concurrent.futures
 
 directoryGlobal = ''
+globalParentDirectory = ''
 def verificarSeExisteTabelas(soup,directory=''):
     tablesObj = {}
 
@@ -34,11 +36,13 @@ def verificarSeExisteTabelas(soup,directory=''):
 
     #TIPO POSSIVEIS DE TABELAS EM DETALHES DE LICITAÇÃO
     if 'Andamentos' in tablesObj:
-        #print('\tPossui Atendimento')
-        andamentos(tablesObj['Andamentos'],directory)
+        print('\tPossui Atendimento')
+        #andamentos(tablesObj['Andamentos'],directory)
 
     if 'Contratos vinculados' in tablesObj:
         print('\tPossui Contrato')
+        contratos(tablesObj['Contratos vinculados'], directory)
+
 
     if 'Licitantes' in tablesObj:
         print('\tPossui Licitantes')
@@ -66,11 +70,6 @@ def andamentos(table,directory):
 
     dadosTabela = {title0: [], title1: [], title2: [], title3: [], "status": []}
 
-    print("\n\t\t"+__name__+"\n")
-    #if __name__ == "__main__":
-
-    #print("\t--------------",directoryGlobal)
-
     with concurrent.futures.ThreadPoolExecutor() as executor:
         result = executor.map(pecorrerLinhasAndamentos, lines)
 
@@ -82,13 +81,8 @@ def andamentos(table,directory):
             dadosTabela["status"].append(dados[4])
 
     print("\t-------Baixou Arquivos")
-    print(directory)
     gerarArquivo.criarCSV(dadosTabela, parentDirectory+"/Detalhes andamento");
 
-    #sequencial
-    #for i in range(0, lines.__len__()):
-        #pecorrerLinhasAndamentos(lines[i])
-    #gerarArquivo.criarCSV(dadosTabela, directory);
 def pecorrerLinhasAndamentos(lines):
 
     colums = lines.find_all()
@@ -115,7 +109,42 @@ def pecorrerLinhasAndamentos(lines):
         statusDonwload = {'status Donwload': "Link não foi passado"}
 
     return [colum0,colum1,colum2,link,statusDonwload['status Donwload']]
-def contratos(link):
+    # Criar uma pasta para os downloads (se ela ainda não existir)
+def contratos(table,directory):
+    print("\tAcessando contratos ligados a Licitação")
+
+    # Criar uma pasta para os downloads (se ela ainda não existir)
+    parentDirectory = directory
+    directory = directory + "/Contratos"
+    global directoryGlobal
+    directoryGlobal = directory
+
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    lines = table.find_all("tr")
+    linesTitle = lines[0].find_all("th")
+    # Remover titulos das colunas
+    lines.pop(0)
+
+    if not lines:
+        return []
+
+    title0 = linesTitle[0].text
+    title1 = linesTitle[1].text
+    title2 = linesTitle[2].text
+    title3 = linesTitle[3].text
+    title4 = linesTitle[4].text
+    title5 = linesTitle[5].text
+
+    dadosTabela = {title0: [], title1: [], title2: [], title3: [], title4: [], title5: []}
+    titles = [title0,title1,title2,title3,title4,title5]
+
+    result = detalhesContrato.acessarPaginaDetalhes(lines,directory,titles,dadosTabela)
+
+    gerarArquivo.criarCSV(result, parentDirectory+"/Contratos ligados a licitação");
+
+def runVerificarSeExisteTabelas(link,directory):
 
     from selenium.webdriver.chrome.options import Options
 
@@ -140,9 +169,10 @@ def contratos(link):
         # Analisar o HTML usando BeautifulSoup
     soup = BeautifulSoup(html, "html.parser")
         # Navegar até a página
-    verificarSeExisteTabelas(soup)
+    verificarSeExisteTabelas(soup, directory)
         # Fechar o navegador
     driver.quit()
+
 '''
 links = [
    "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136437",
@@ -153,4 +183,4 @@ links = [
 for i in links:
     contratos(i)
 '''
-#contratos('https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499')
+runVerificarSeExisteTabelas('https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136498',"ARQUIVOS")

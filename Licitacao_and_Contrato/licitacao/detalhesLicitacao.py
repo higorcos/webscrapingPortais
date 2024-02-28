@@ -87,9 +87,6 @@ def mostrarDetalhe(driver,directoryInformation,link):
 
     print("tempo de execução", tempo_total)
 
-
-
-
 def runMostrarDetalhe():
 
     #link = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";

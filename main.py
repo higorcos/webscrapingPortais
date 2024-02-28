@@ -39,5 +39,4 @@ fim = time.time()
 
 # Calcula o tempo total de execução
 tempo_total = fim - inicio
-
-print("tempo de execução",tempo_total)
+print("\nTempo de execução",tempo_total)
