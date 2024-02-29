@@ -8,12 +8,9 @@ import os
 import re
 
 
-# Registra o tempo de início
-inicio = time.perf_counter()
-
 def mostrarDetalhe(driver,directoryInformation,link):
     dadosTabela = {}
-
+    print("Acessando: ", link)
     # Criar uma pasta geral
     if not os.path.exists(directoryInformation["licitacaoFolder"]):
         os.makedirs(directoryInformation["licitacaoFolder"])
@@ -21,8 +18,6 @@ def mostrarDetalhe(driver,directoryInformation,link):
 
     # Navegar até a página
     driver.get(link)
-
-    # Aguardar o carregamento da página
     time.sleep(1)
 
     # Obter o código HTML da página
@@ -78,14 +73,10 @@ def mostrarDetalhe(driver,directoryInformation,link):
     gerarArquivo.criarCSV(dadosTabela, namefolder + '/Detalhes da licitação')
     gerarArquivo.editarCSV(dadosTabela, directoryInformation["licitacaoFolder"]+'/Todas as licitações')
     #time.sleep(2)
-    print("Acessando: ",link)
 
     tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder)
 
-    fim = time.perf_counter()
-    tempo_total = fim - inicio
 
-    print("tempo de execução", tempo_total)
 
 def runMostrarDetalhe():
 

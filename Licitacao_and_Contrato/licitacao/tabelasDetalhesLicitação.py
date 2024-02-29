@@ -36,11 +36,11 @@ def verificarSeExisteTabelas(soup,directory=''):
 
     #TIPO POSSIVEIS DE TABELAS EM DETALHES DE LICITAÇÃO
     if 'Andamentos' in tablesObj:
-        print('\tPossui Atendimento')
-        #andamentos(tablesObj['Andamentos'],directory)
+        #print('\tPossui Atendimento')
+        andamentos(tablesObj['Andamentos'],directory)
 
     if 'Contratos vinculados' in tablesObj:
-        print('\tPossui Contrato')
+        #print('\tPossui Contrato')
         contratos(tablesObj['Contratos vinculados'], directory)
 
 
@@ -62,6 +62,8 @@ def andamentos(table,directory):
     linesTitle = lines[0].find_all("th")
     # Remover titulos das colunas
     lines.pop(0)
+    if not lines:
+        return []
 
     title0 = linesTitle[0].text
     title1 = linesTitle[1].text
@@ -147,40 +149,39 @@ def contratos(table,directory):
 def runVerificarSeExisteTabelas(link,directory):
 
     from selenium.webdriver.chrome.options import Options
-
-    # Configurações para executar o Chrome em modo headless
-    chrome_options = Options()
-    chrome_options.add_argument('--headless')  # Ativa o modo headless
-
-    # Inicializa o driver do Selenium com as opções configuradas
-    driver = webdriver.Chrome(options=chrome_options)
-
-
-           # Criar uma nova instância do driver do Chrome
-   # driver = webdriver.Chrome()
-        # Definir o tamanho da janela
-    driver.set_window_size(800, 600);
-    driver.get(link)
-           # Aguardar o carregamento da página
-    #time.sleep(5)
+    if link:
+        # Configurações para executar o Chrome em modo headless
+        # Inicializa o driver do Selenium com as opções configuradas
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')  # Ativa o modo headless
+        driver = webdriver.Chrome(options=chrome_options)
+        #driver = webdriver.Chrome()
+        #driver.set_window_size(800, 600);
+        driver.get(link)
+        time.sleep(2)
 
         # Obter o código HTML da página
-    html = driver.page_source
+        html = driver.page_source
         # Analisar o HTML usando BeautifulSoup
-    soup = BeautifulSoup(html, "html.parser")
+        soup = BeautifulSoup(html, "html.parser")
         # Navegar até a página
-    verificarSeExisteTabelas(soup, directory)
+        verificarSeExisteTabelas(soup, directory)
         # Fechar o navegador
-    driver.quit()
+        driver.quit()
 
-'''
+
 links = [
-   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136437",
-   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136424",
-   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136513",
-   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/140809"
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136437",
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136424",
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136513",
+   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136498",
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/140809",
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991133514",
+    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991135470"
+    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/8308"
           ]
-for i in links:
-    contratos(i)
 '''
-runVerificarSeExisteTabelas('https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136498',"ARQUIVOS")
+for i in links:
+    print(i)
+    runVerificarSeExisteTabelas(i,"ARQUIVOS")
+'''

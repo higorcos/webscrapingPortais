@@ -1,6 +1,6 @@
 import requests
 import os
-
+import re
 
 def link(link,file_dir):
     # Verificar se o link termina com uma extensão de arquivo comum (por exemplo, .pdf, .doc, .xlsx, etc.)
@@ -14,9 +14,11 @@ def link(link,file_dir):
             if response.status_code == 200:
                 # Extrair o nome do arquivo do URL do link
                 filename = os.path.basename(link)
+                filename = limitar_tamanho_nome_arquivo(filename)
 
                 if not os.path.exists(file_dir):
                     os.makedirs(file_dir)
+
 
                 # Salvar o conteúdo do arquivo dentro da pasta individual
                 file_path = os.path.join(file_dir, filename)
@@ -34,3 +36,14 @@ def link(link,file_dir):
     else:
         print(f"\n\n\t\tO link '{link}' não é um link para um arquivo conhecido, ignorando...")
         return {'status Donwload': "Link não é um arquivo"}
+def limitar_tamanho_nome_arquivo(nome, tamanho_max=3):
+    # Extrair extensão do arquivo
+    nome_base, extensao = os.path.splitext(nome)
+
+    # Limitar o tamanho do nome (sem contar a extensão)
+    nome_base = nome_base[:tamanho_max]
+
+    # Remover caracteres especiais e espaços
+    nome_base = re.sub(r'[^\w\s]', '', nome_base)
+
+    return nome_base + extensao

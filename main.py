@@ -5,9 +5,10 @@ import time
 import requests
 import os
 from Licitacao_and_Contrato.licitacao import licitacaoPaginacao
+from selenium.webdriver.chrome.options import Options
 
 # Registra o tempo de início
-inicio = time.time()
+inicio = time.perf_counter()
 
 linkLicitacao = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/exibir";
 nomePortal = "Mirador";
@@ -22,9 +23,12 @@ directoryInformation = {
 if not os.path.exists(directoryInformation["mainFolder"]):
     os.makedirs(directoryInformation["mainFolder"])
 
-# Criar uma nova instância do driver do Chrome
-driver = webdriver.Chrome()
 
+# Configurações para executar o Chrome em modo headless
+chrome_options = Options()
+chrome_options.add_argument('--headless')  # Ativa o modo headless
+driver = webdriver.Chrome(options=chrome_options)
+#driver = webdriver.Chrome()
 # Definir o tamanho da janela
 driver.set_window_size(800, 600);
 
@@ -37,6 +41,8 @@ driver.quit()
 # Registra o tempo de término
 fim = time.time()
 
-# Calcula o tempo total de execução
+
+fim = time.perf_counter()
 tempo_total = fim - inicio
-print("\nTempo de execução",tempo_total)
+
+print("tempo de execução", tempo_total)
