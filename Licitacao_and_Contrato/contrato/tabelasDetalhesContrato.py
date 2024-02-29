@@ -1,5 +1,6 @@
 import os
 from Ultils import gerarArquivo, downloadArquivos
+from Ultils.pastas import pastasDocumentosDosModulos as criarPastaJson
 import concurrent.futures
 
 directoryGlobal = ''
@@ -77,7 +78,7 @@ def documentos(table,directory):
             dadosTabela[title3].append(dados[3])
             dadosTabela["status"].append(dados[4])
 
-    print("\t-------Baixou Arquivos de Documentos de Contrato")
+    print("\t\tBaixou Documentos de Contrato")
     gerarArquivo.criarCSV(dadosTabela, parentDirectory+"/Detalhes Documentos");
 
 def pecorrerLinhasDocumentos(lines):
@@ -89,14 +90,11 @@ def pecorrerLinhasDocumentos(lines):
     link = colum3
     #print("\t"+colum0, colum1, colum2, colum3)
 
-    print("\tLINK:" + colum3);
+    print("\tLINK:" + link);
 
-    # Criar uma pasta individual para o arquivo baixado dentro da pasta de downloads
-    dateFileNewFormat = colum2.replace('/', '-').replace(':', '-')  # remover barra e dois pontos
-    #newDir = "TIPO " + limpar_nome(colum0)
-    newDir = "TIPO " + colum0.replace('/', '-').replace(':', '-') + " " + dateFileNewFormat
-    #newDir = "a"+dateFileNewFormat
-    file_dir = os.path.join(directoryGlobal, newDir)
+    dados = {"tipo": colum0, "descricao": colum1, "data": colum2, "link": link}
+    # Criar uma pasta e arquivo json com dados
+    file_dir = criarPastaJson.documentosDoContrato(dados, directoryGlobal)
 
     # Verificar se tem link
     if link:
@@ -122,7 +120,7 @@ def ficalizacaoDoContrato(table, directory):
     # Remover titulos das colunas
     lines.pop(0)
     if not lines:
-        print('nada')
+        #print('nada')
         return []
     print("\tDownload ficalizacao do contrato")
 
@@ -146,9 +144,8 @@ def ficalizacaoDoContrato(table, directory):
             dadosTabela['link'].append(dados[4])
             dadosTabela["status"].append(dados[5])
 
-    print("\t-------Baixou Arquivos de Documentos de Contrato")
+    print("\t\tBaixou Fiscalização de Contrato")
     gerarArquivo.criarCSV(dadosTabela, parentDirectory + "/Detalhes ficalizacao");
-
 
 def pecorrerLinhasFicalizacaoDoContrato(lines):
     colums = lines.find_all()
@@ -162,10 +159,9 @@ def pecorrerLinhasFicalizacaoDoContrato(lines):
 
     print("\tLINK:" + link);
 
-    # Nome pasta
-    newDir = "FISCAL " + colum2 + " POT "+ colum3
-    newDir = newDir.replace('/', '-').replace(':', '-').replace("*","")
-    file_dir = os.path.join(directoryGlobal, newDir)
+    dados = {"designacao": colum0, "cpf": colum1, "nome": colum2, "portaria": colum3,"link":link}
+    # Criar uma pasta e arquivo json com dados
+    file_dir = criarPastaJson.documentosDeFiscalizacaoDoContrato(dados, directoryGlobal)
 
     # Verificar se tem link
     if link:

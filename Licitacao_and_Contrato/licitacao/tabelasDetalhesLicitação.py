@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import time
 import os
 from Ultils import gerarArquivo, downloadArquivos
+from Ultils.pastas.pastasDocumentosDosModulos import andamento as criarPastaJson
 from Licitacao_and_Contrato.contrato import detalhesContrato
 import concurrent.futures
 
@@ -43,9 +44,9 @@ def verificarSeExisteTabelas(soup,directory=''):
         #print('\tPossui Contrato')
         contratos(tablesObj['Contratos vinculados'], directory)
 
-
     if 'Licitantes' in tablesObj:
         print('\tPossui Licitantes')
+
 def andamentos(table,directory):
     print("\tDownload arquivos de andamento da Licitação")
 
@@ -82,7 +83,7 @@ def andamentos(table,directory):
             dadosTabela[title3].append(dados[3])
             dadosTabela["status"].append(dados[4])
 
-    print("\t-------Baixou Arquivos")
+    print("\t\tBaixou Arquivos de Andamento")
     gerarArquivo.criarCSV(dadosTabela, parentDirectory+"/Detalhes andamento");
 
 def pecorrerLinhasAndamentos(lines):
@@ -95,15 +96,13 @@ def pecorrerLinhasAndamentos(lines):
     link = colum3
     #print("\t"+colum0, colum1, colum2, colum3)
 
-    print("\tLINK:" + colum3);
+    print("\tLINK:" + link);
 
-    # Criar uma pasta individual para o arquivo baixado dentro da pasta de downloads
-    dateFileNewFormat = colum2.replace('/', '-').replace(':', '-')  # remover barra e dois pontos
-    newDir = "TIPO " + colum0 + " " + dateFileNewFormat
+    dados =  {"tipo":colum0,"descricao": colum1, "data":colum2, "link":link}
+    # Criar uma pasta e arquivo json com dados
+    file_dir = criarPastaJson(dados,directoryGlobal)
 
-    file_dir = os.path.join(directoryGlobal, newDir)
-
-    # Verificar se tem link
+    #Verificar se tem link
     if link:
         statusDonwload = downloadArquivos.link(link, file_dir)
     else:
@@ -111,7 +110,7 @@ def pecorrerLinhasAndamentos(lines):
         statusDonwload = {'status Donwload': "Link não foi passado"}
 
     return [colum0,colum1,colum2,link,statusDonwload['status Donwload']]
-    # Criar uma pasta para os downloads (se ela ainda não existir)
+    #Criar uma pasta para os downloads (se ela ainda não existir)
 def contratos(table,directory):
     print("\tAcessando contratos ligados a Licitação")
 
@@ -180,8 +179,7 @@ links = [
     #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991135470"
     #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/8308"
           ]
-'''
+
 for i in links:
-    print(i)
+
     runVerificarSeExisteTabelas(i,"ARQUIVOS")
-'''
