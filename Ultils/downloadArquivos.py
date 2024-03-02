@@ -16,10 +16,6 @@ def link(link,file_dir):
                 filename = os.path.basename(link)
                 filename = limitar_tamanho_nome_arquivo(filename)
 
-                if not os.path.exists(file_dir):
-                    os.makedirs(file_dir)
-
-
                 # Salvar o conteúdo do arquivo dentro da pasta individual
                 file_path = os.path.join(file_dir, filename)
                 with open(file_path, 'wb') as f:

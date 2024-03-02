@@ -44,8 +44,8 @@ def verificarSeExisteTabelas(soup,directory=''):
         #print('\tPossui Contrato')
         contratos(tablesObj['Contratos vinculados'], directory)
 
-    if 'Licitantes' in tablesObj:
-        print('\tPossui Licitantes')
+    #if 'Licitantes' in tablesObj:
+    #    print('\tPossui Licitantes')
 
 def andamentos(table,directory):
     print("\tDownload arquivos de andamento da Licitação")
@@ -180,6 +180,5 @@ links = [
     #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/8308"
           ]
 
-for i in links:
-
-    runVerificarSeExisteTabelas(i,"ARQUIVOS")
+#for i in links:
+    #runVerificarSeExisteTabelas(i,"ARQUIVOS")

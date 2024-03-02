@@ -123,6 +123,7 @@ def ficalizacaoDoContrato(table, directory):
         #print('nada')
         return []
     print("\tDownload ficalizacao do contrato")
+    print(lines.__len__())
 
     title0 = linesTitle[0].text
     title1 = linesTitle[1].text
@@ -148,6 +149,7 @@ def ficalizacaoDoContrato(table, directory):
     gerarArquivo.criarCSV(dadosTabela, parentDirectory + "/Detalhes ficalizacao");
 
 def pecorrerLinhasFicalizacaoDoContrato(lines):
+    print("\t\tRodando Ficalização")
     colums = lines.find_all()
     colum0 = colums[0].text
     colum1 = colums[1].text

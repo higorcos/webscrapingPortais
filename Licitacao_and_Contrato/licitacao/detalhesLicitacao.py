@@ -1,19 +1,20 @@
 from Licitacao_and_Contrato.licitacao import tabelasDetalhesLicitação
+from Ultils.pastas.pastasModulos import licitacao as criarPasta
 from Ultils import gerarArquivo
 from selenium import webdriver
 from bs4 import BeautifulSoup
-import random
 import time
 import os
-import re
+
 
 
 def mostrarDetalhe(driver,directoryInformation,link):
     dadosTabela = {}
     print("Acessando: ", link)
+    directory = directoryInformation["licitacaoFolder"]
     # Criar uma pasta geral
-    if not os.path.exists(directoryInformation["licitacaoFolder"]):
-        os.makedirs(directoryInformation["licitacaoFolder"])
+    if not os.path.exists(directory):
+        os.makedirs(directory)
 
 
     # Navegar até a página
@@ -38,37 +39,35 @@ def mostrarDetalhe(driver,directoryInformation,link):
             dadosTabela[chave].append(valor)
 
         else:
-            print("")
-    ##Dados que não seguem o mesmo padrão no HTML
-        #Natureza de despesa:
-        #Objeto:
-    naturezaDespesa = soup.select('.col-md-2+ .col-md-12')
-    objeto = soup.select('.col-md-4+ .col-md-12')
+            if input.find("label"):
+                if input.find("label").text == "Objeto: ":
+                    dadosTabela["Objeto"] = []
+                    valorObjeto = input.find("textarea").text
+                    dadosTabela["Objeto"].append(valorObjeto)
 
-    chaveNaturezaDespesa = naturezaDespesa[0].find("label").text
-    valorNaturezaDespesa = naturezaDespesa[0].find("textarea").text
+                    ##Dados que não seguem o mesmo padrão no HTML
+                    # Natureza de despesa:
+                    # Objeto:
+                elif input.find("label").text == "Natureza de despesa: ":
+                    dadosTabela["Natureza de despesa"] = []
+                    valorObjeto = input.find("textarea").text
+                    dadosTabela["Natureza de despesa"].append(valorObjeto)
+                else:
+                    print('')
 
-    dadosTabela[chaveNaturezaDespesa] = []
-    dadosTabela[chaveNaturezaDespesa].append(valorNaturezaDespesa)
+    # Validar
+    if 'Nº Processo ' in dadosTabela and dadosTabela['Nº Processo '][0] is not None and dadosTabela['Nº Processo '][
+        0] != "":
+        numeroProcesso = dadosTabela['Nº Processo '][0]
+    else:
+        numeroProcesso = ''
 
-    chaveObjeto = objeto[0].find("label").text
-    valorObjeto = objeto[0].find("textarea").text
+    dadosName = {"numero": numeroProcesso, "link": link}
 
-    dadosTabela[chaveObjeto] = []
-    dadosTabela[chaveObjeto].append(valorObjeto)
-
-
-    # Use uma expressão regular para encontrar o número na URL
-    numeroDoLink = re.search(r'(\d+)$', link).group(1)
-    # Numero do processo
-    numberProcesso = dadosTabela['Nº Processo '][0]
-    numberProcesso = numberProcesso.replace('/', '-').replace(':', '.') #remover barra e dois
-    namefolder = directoryInformation["licitacaoFolder"] +"/"+ "Nº "+ numberProcesso +"  ID-"+numeroDoLink
+    # Criar uma pasta e arquivo json com dados
+    namefolder = criarPasta(dadosName, directory)
 
 
-    # Criar uma pasta para cada licitação
-    if not os.path.exists(namefolder):
-        os.makedirs(namefolder)
 
     gerarArquivo.criarCSV(dadosTabela, namefolder + '/Detalhes da licitação')
     gerarArquivo.editarCSV(dadosTabela, directoryInformation["licitacaoFolder"]+'/Todas as licitações')

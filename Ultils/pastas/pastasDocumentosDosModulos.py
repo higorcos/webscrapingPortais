@@ -3,8 +3,7 @@
 '''
 import os
 from Ultils.pastas.nomeDasPastas import gerarJson,removerCaracteresReservados,cortarString
-
-
+import re
 
 #Andamento
 #Documento
@@ -43,7 +42,9 @@ def documentosDeFiscalizacaoDoContrato(dados,directory):
     # Nome pasta
     nomePadrao = dados["designacao"]+"-"+dados["nome"]
     nomePadrao = cortarString(nomePadrao)
-    id = ' ' + dados["portaria"]
+    nomeDolink = removerNomeDoLink(dados["link"])
+    id = limitar_tamanho_nome_arquivo(nomeDolink)
+    id = ' ' + id
     nomeMaisId = nomePadrao + id
     newDir = removerCaracteresReservados(nomeMaisId)
 
@@ -62,6 +63,23 @@ def criarPastaEjson(dados,file_dir):
 
     return file_dir
 
+def limitar_tamanho_nome_arquivo(nome, tamanho_max=4):
+    # Extrair extensão do arquivo
+    nome_base, extensao = os.path.splitext(nome)
+
+    # Limitar o tamanho do nome (sem contar a extensão)
+    nome_base = nome_base[:tamanho_max]
+
+    # Remover caracteres especiais e espaços
+    nome_base = re.sub(r'[^\w\s]', '', nome_base)
+
+    return nome_base + extensao
+
+def removerNomeDoLink(link):
+    partes = link.split('/')
+    nome_arquivo_com_extensao = partes[-1]
+    print(nome_arquivo_com_extensao)
+    return nome_arquivo_com_extensao
 
 
 

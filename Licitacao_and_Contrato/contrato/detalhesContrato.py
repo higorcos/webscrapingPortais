@@ -1,4 +1,5 @@
 from Licitacao_and_Contrato.contrato import tabelasDetalhesContrato
+from Ultils.pastas.pastasModulos import contrato as  criarPasta
 from selenium.webdriver.chrome.options import Options
 from Ultils import gerarArquivo
 from selenium import webdriver
@@ -79,16 +80,18 @@ def mostrarDetalhe(line):
     dadosTabela["link"] = []
     dadosTabela["link"].append(link)
 
-    #NOME PASTA
-    numeroDoLink = re.search(r'(\d+)$', link).group(1) # Use uma expressão regular para encontrar o número na URL
-    numeroDoContrato = dadosTabela['Nº Contrato'][0]
-    numeroDoContrato = numeroDoContrato.replace('/', '-').replace(':', '.') #remover barra e dois
-    namefolder = directoryGlobal +"/"+ "N°"+ numeroDoContrato +" ID"+numeroDoLink
+    #Validar
+    if 'Nº Contrato' in dadosTabela and dadosTabela['Nº Contrato'][0] is not None and dadosTabela['Nº Contrato'][
+        0] != "":
+        numeroContrato = dadosTabela['Nº Contrato'][0]
+    else:
+        numeroContrato = ''
 
+    dadosName = {"numero":numeroContrato,"link":link }
 
-    # Criar uma pasta para cada contrato
-    if not os.path.exists(namefolder):
-        os.makedirs(namefolder)
+    # Criar uma pasta e arquivo json com dados
+    namefolder = criarPasta(dadosName, directoryGlobal)
+
 
     gerarArquivo.criarCSV(dadosTabela, namefolder + '/Detalhes do contrato')
 
