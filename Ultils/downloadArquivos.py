@@ -43,3 +43,28 @@ def limitar_tamanho_nome_arquivo(nome, tamanho_max=3):
     nome_base = re.sub(r'[^\w\s]', '', nome_base)
 
     return nome_base + extensao
+def linkSemExtensao(link, file_dir):
+    if link.endswith(('.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv', '.txt')):
+        return link(link,file_dir);
+    else:
+        try:
+            # Enviar uma solicitação GET para o URL do link
+            response = requests.get(link)
+
+            # Verificar se a solicitação foi bem-sucedida (código de status 200)
+            if response.status_code == 200:
+                # Extrair o nome do arquivo do URL do link
+                filename = os.path.basename(link+'.pdf')
+
+                # Salvar o conteúdo do arquivo dentro da pasta especificada
+                file_path = os.path.join(file_dir, filename)
+                with open(file_path, 'wb') as f:
+                    f.write(response.content)
+
+                return {'status Donwload': "Sucesso"}
+            else:
+                print(f"\n\n\t\tErro na Resposta do link '{link}': Código de status {response.status_code}")
+                return {'status Donwload': "Erro na Resposta do link"}
+        except Exception as e:
+            print(f"\n\n\t\tErro ao baixar o arquivo do link '{link}': {e}")
+            return {'status Donwload': "Erro ao Baixar"}

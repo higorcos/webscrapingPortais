@@ -4,7 +4,7 @@
 import os
 from Ultils.pastas.nomeDasPastas import gerarJson,removerCaracteresReservados,cortarString
 import re
-
+import uuid
 #Andamento
 #Documento
 #Fiscal
@@ -24,6 +24,49 @@ def andamento(dados,directory):
 
     return newFile
 
+def diarioWEBSERVER(dados,directory):
+
+
+    # Generar un UUID (Identificador Único Universal)
+    id = uuid.uuid4()
+    # Nome pasta
+    nomePadrao = diarioLink(dados['Link'])
+    nomeMaisId = str(id)
+    newDir =  nomeMaisId
+
+    #Caminho
+    file_dir = os.path.join(directory, newDir)
+    newFile = criarPastaEjson(dados,file_dir)
+
+    return newFile
+
+def diarioTECUPDATE(dados,directory):
+
+
+    # Generar un UUID (Identificador Único Universal)
+    nomePadrao = 'N°'+dados["edicao"] + '-' + dados["tipo"]+"-"
+    nomePadrao = cortarString(nomePadrao,20)
+    # Nome pasta
+    nomeMaisId = str(dados["id"])
+    newDir =  nomePadrao+nomeMaisId
+
+    #Caminho
+    file_dir = os.path.join(directory, newDir)
+    newFile = criarPastaEjson(dados,file_dir)
+
+    return newFile
+
+def diarioLink(link):
+    # Expressão regular para extrair o código específico da URL
+    padrao = r"/view_diario/([0-9a-f]+)"
+    # Procurar o padrão na URL
+    match = re.search(padrao, link)
+    # Verificar se há correspondência e obter o código específico
+    if match:
+        codigo = match.group(1)
+        return codigo
+    else:
+        return '00'
 def documentosDoContrato(dados,directory):
     # Nome pasta
     nomePadrao = dados["tipo"] + '-' + dados["descricao"]
@@ -40,11 +83,11 @@ def documentosDoContrato(dados,directory):
 
 def documentosDeFiscalizacaoDoContrato(dados,directory):
     # Nome pasta
-    nomePadrao = dados["designacao"]+"-"+dados["nome"]
+    nomePadrao = "Fiscal"+"-"+dados["nome"]
     nomePadrao = cortarString(nomePadrao)
     nomeDolink = removerNomeDoLink(dados["link"])
     id = limitar_tamanho_nome_arquivo(nomeDolink)
-    id = ' ' + id
+    id = '-' + id
     nomeMaisId = nomePadrao + id
     newDir = removerCaracteresReservados(nomeMaisId)
 
@@ -56,8 +99,13 @@ def documentosDeFiscalizacaoDoContrato(dados,directory):
 
 def criarPastaEjson(dados,file_dir):
 
-    if not os.path.exists(file_dir):
-        os.makedirs(file_dir)
+    try:
+        if not os.path.exists(file_dir):
+            os.makedirs(file_dir)
+        else:
+            print(f"")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{file_dir}': {e} \n\n")
 
     gerarJson(dados, file_dir)#gerarJson
 
@@ -73,7 +121,7 @@ def limitar_tamanho_nome_arquivo(nome, tamanho_max=4):
     # Remover caracteres especiais e espaços
     nome_base = re.sub(r'[^\w\s]', '', nome_base)
 
-    return nome_base + extensao
+    return nome_base
 
 def removerNomeDoLink(link):
     partes = link.split('/')

@@ -4,6 +4,7 @@ from Ultils.pastas import pastasDocumentosDosModulos as criarPastaJson
 import concurrent.futures
 
 directoryGlobal = ''
+directoryGlobalFiscal = ''
 globalParentDirectory = ''
 
 
@@ -49,8 +50,13 @@ def documentos(table,directory):
     global directoryGlobal
     directoryGlobal = directory
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            print(f"A pasta '{directory}' já existe.")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
 
     lines = table.find_all("tr")
     linesTitle = lines[0].find_all("th")
@@ -109,11 +115,16 @@ def ficalizacaoDoContrato(table, directory):
     # Criar uma pasta para os downloads (se ela ainda não existir)
     parentDirectory = directory
     directory = directory + "/ficalizacao"
-    global directoryGlobal
-    directoryGlobal = directory
+    global directoryGlobalFiscal
+    directoryGlobalFiscal = directory
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            print(f"A pasta '{directory}' já existe.")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
 
     lines = table.find_all("tr")
     linesTitle = lines[0].find_all("th")
@@ -155,21 +166,27 @@ def pecorrerLinhasFicalizacaoDoContrato(lines):
     colum1 = colums[1].text
     colum2 = colums[2].text
     colum3 = colums[3].text
-    colum4 = colums[4].find('a').get('href')  # link
-    link = colum4
+    #link
+    if colums[4].find('a'):
+        if colums[4].find('a').get('href'):
+            link = colums[4].find('a').get('href')
+        else:
+            link = '';
+    else:
+        link = ''
     #print("\t"+colum0, colum1, colum2)
 
-    print("\tLINK:" + link);
 
     dados = {"designacao": colum0, "cpf": colum1, "nome": colum2, "portaria": colum3,"link":link}
     # Criar uma pasta e arquivo json com dados
-    file_dir = criarPastaJson.documentosDeFiscalizacaoDoContrato(dados, directoryGlobal)
+    file_dir = criarPastaJson.documentosDeFiscalizacaoDoContrato(dados, directoryGlobalFiscal)
 
     # Verificar se tem link
-    if link:
+    if link and link != '':
+        print("\tLINK:" + link);
         statusDonwload = downloadArquivos.link(link, file_dir)
     else:
-        print("\tLink não encontrado")
+        print("\tLink não encontrado (Fiscalização)")
         statusDonwload = {'status Donwload': "Link não foi passado"}
 
     return [colum0, colum1, colum2,colum3, link, statusDonwload['status Donwload']]

@@ -9,6 +9,7 @@ from Licitacao_and_Contrato.contrato import detalhesContrato
 import concurrent.futures
 
 directoryGlobal = ''
+directoryGlobalContratos = ''
 globalParentDirectory = ''
 def verificarSeExisteTabelas(soup,directory=''):
     tablesObj = {}
@@ -56,8 +57,13 @@ def andamentos(table,directory):
     global directoryGlobal
     directoryGlobal = directory
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            print(f"A pasta '{directory}' já existe.")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
 
     lines = table.find_all("tr")
     linesTitle = lines[0].find_all("th")
@@ -117,11 +123,16 @@ def contratos(table,directory):
     # Criar uma pasta para os downloads (se ela ainda não existir)
     parentDirectory = directory
     directory = directory + "/Contratos"
-    global directoryGlobal
-    directoryGlobal = directory
+    global directoryGlobalContratos
+    directoryGlobalContratos = directory
 
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            print(f"A pasta '{directory}' já existe.")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
 
     lines = table.find_all("tr")
     linesTitle = lines[0].find_all("th")
@@ -173,7 +184,8 @@ links = [
    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136437",
    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136424",
    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136513",
-   "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136498",
+   #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136498",
+    "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991132074"
    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/140809",
    #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991133514",
     #"https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991135470"

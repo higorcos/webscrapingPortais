@@ -10,7 +10,7 @@ from Ultils import gerarArquivo,downloadArquivos
 linkPortal = "https://transparencia.mirador.ma.gov.br/acessoInformacao/diario/diario";
 nomePortal = "Mirador";
 tipoPortal = "PM";
-tipoArquivosDownloads = "Diário Oficial";
+tipoArquivosDownloads = "DiárioOficial-Siganet";
 
 dadosTabela = {"Nº EDIÇÃO":[],"DATA":[], "STATUS":[], "LINK":[]}
 # Criar uma pasta para os downloads (se ela ainda não existir)

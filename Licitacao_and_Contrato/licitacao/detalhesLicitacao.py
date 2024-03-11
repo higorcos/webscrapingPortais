@@ -13,8 +13,15 @@ def mostrarDetalhe(driver,directoryInformation,link):
     print("Acessando: ", link)
     directory = directoryInformation["licitacaoFolder"]
     # Criar uma pasta geral
-    if not os.path.exists(directory):
-        os.makedirs(directory)
+
+
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        else:
+            print(f"A pasta '{directory}' já existe.")
+    except Exception as e:
+        print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
 
 
     # Navegar até a página
