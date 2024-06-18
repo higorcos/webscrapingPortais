@@ -8,7 +8,22 @@ import uuid
 #Andamento
 #Documento
 #Fiscal
+import random
+def documentosDeLicitacao(dados,directory):
 
+    # Nome pasta
+    nomePadrao = dados["tipo"]
+    nomePadrao = cortarString(nomePadrao)
+    numero_aleatorio = random.randint(1, 1000)
+    id = " "+dados['data'] +" "+ str(numero_aleatorio)
+    nomeMaisId = nomePadrao + id
+    newDir = removerCaracteresReservados(nomeMaisId)
+
+    #Caminho
+    file_dir = os.path.join(directory, newDir)
+    newFile = criarPastaEjson(dados,file_dir)
+
+    return newFile
 def andamento(dados,directory):
 
     # Nome pasta
@@ -23,7 +38,6 @@ def andamento(dados,directory):
     newFile = criarPastaEjson(dados,file_dir)
 
     return newFile
-
 def diarioWEBSERVER(dados,directory):
 
 

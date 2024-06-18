@@ -12,6 +12,23 @@ import concurrent.futures
 from selenium.webdriver.chrome.options import Options
 from Ultils.pastas.pastasDocumentosDosModulos import diarioTECUPDATE as criarPastaJson
 
+import sqlite3
+import os
+
+# Obtenha o diretório pai do diretório atual
+diretorio_pai = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Caminho para o arquivo SQLite
+caminho_banco_dados = os.path.join(diretorio_pai, 'exemplo.db')
+
+# Conecte-se ao banco de dados SQLite
+conn = sqlite3.connect(caminho_banco_dados)
+# Conecte-se ao banco de dados SQLite (criará um novo banco de dados se não existir)
+#conn = sqlite3.connect('../../exemplo.db')
+
+# Crie um cursor para executar comandos SQL
+cursor = conn.cursor()
+
 
 
 linkPortal = "https://tecnologiaupdate.com/pirapemas.diario/showAllEditions.php";
@@ -156,6 +173,25 @@ for i in range(0, lines.__len__()):
     dadosTabela['pasta'].append(file_dir)
     dadosTabela['link'].append(linkDownloadViews)
 
+    # Defina os dados para inserir
+    dados_usuario = (dado0, 'Arquivo de licitação', dado2, 'https', file_dir, statusDonwload['status Donwload'])
+
+    # Defina uma instrução SQL para inserir dados na tabela
+    insert_query = '''
+    INSERT INTO diario_oficial (nome,tipo_modulo,tipo_arquivo,link,caminho,status)
+    VALUES (?,?,?,?,?,?)
+    '''
+
+    # Execute a instrução SQL para inserir os dados
+    cursor.execute(insert_query, dados_usuario)
+
+    # Faça o commit para salvar as alterações no banco de dados
+    conn.commit()
+
+
+
 gerarArquivo.criarCSV(dadosTabela, download_dir);
+# Feche a conexão com o banco de dados
+conn.close()
 driver.quit()
 print('\n\tFIM')
