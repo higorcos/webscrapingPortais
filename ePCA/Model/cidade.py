@@ -4,7 +4,7 @@ def inserir_cidade(conn, value):
     """ Verificar """
     result = cidade_existe(conn,value)
     if result:
-        print(f"A cidade {value} existe na tabela.")
+        #print(f"A cidade {value} existe na tabela.")
         return result
     else:
         print(f"A cidade {value} não existe na tabela.")

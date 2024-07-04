@@ -8,7 +8,7 @@ def inserir_cidadeAnoStatus(conn, value):
         return result
 
     """ Insert """
-    sql = '''INSERT INTO CidadeAnoStatus (idCidade, idAno, status) VALUES(?, ?, 'adicionou e inicinou') '''
+    sql = '''INSERT INTO CidadeAnoStatus (idCidade, idAno, status) VALUES(?, ?, 'adicionou e iniciou') '''
     cur = conn.cursor()
     cur.execute(sql, value)
     conn.commit()

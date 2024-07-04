@@ -29,8 +29,8 @@ def acessarPaginaPrincipal():
 
     # Inicializar o ChromeDriver com as opções
     driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(2000, 800);
-    #driver.set_window_size(800, 1000);
+    #driver.set_window_size(2000, 800);
+    driver.set_window_size(800, 1000);
     driver.get(link)
     time.sleep(5) #delay
 
@@ -42,7 +42,6 @@ def acessarPaginaPrincipal():
 
     for paginaCidade in range(quantidadePaginacao):
         if paginaCidade != 0:
-            print(paginaCidade)
             sairEvoltarParaPaginaPrincipal(driver)
             botaoMostrarCidade(driver)
             for k in range(paginaCidade):
@@ -53,14 +52,13 @@ def acessarPaginaPrincipal():
             if posicaoElemento != 1:
                 botaoMostrarCidade(driver)
 
-            cidadeSelecionada = clickSelecaoCidade(driver,posicaoElemento)
+            #cidadeSelecionada = clickSelecaoCidade(driver,posicaoElemento)
             #cidadeSelecionada = clickSelecaoCidade(driver,2)
-            idCidade = SQLcidade.inserir_cidade(conexaoDB,cidadeSelecionada)
-
+            #idCidade = SQLcidade.inserir_cidade(conexaoDB,cidadeSelecionada)
 
             ##ANO
-            time.sleep(0.5)  # delay
-            botaoMostrarAnos(driver)
+            #time.sleep(0.5)  # delay
+            #botaoMostrarAnos(driver)
             resultadoQuantidadeDeAnosNoLayout = quantidadeDeAnosNoLayout(driver)
             arraySequencial = np.arange(1, resultadoQuantidadeDeAnosNoLayout + 1)
 
@@ -74,13 +72,11 @@ def acessarPaginaPrincipal():
             ondemDaCidadeNoLayout = posicaoNomeNaLista + 1
 
             #Abrir umas noba aba e fechar a atinga e rodar
-            sairEvoltarParaPaginaPrincipal(driver)
-            pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout)
-
-            '''
-            for param in parametros:
-                print(param)
-            '''
+            #sairEvoltarParaPaginaPrincipal(driver)
+            pegarNovoTokenQuandoVoltarDoDownload(driver)
+            #print('Aqui depois de sair EvoltarParaPaginaPrincipal ')
+            pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout,conexaoDB,False)
+            #print('Depois de pecorrer ate a cidade novamente ')
             '''
             for j in range(resultadoQuantidadeDeAnosNoLayout):
                 posicaoElementoAno = j + 1
@@ -196,6 +192,34 @@ def sairEvoltarParaPaginaPrincipal(driver):
     driver.back()
     time.sleep(0.4)
     return
+
+def pegarNovoTokenQuandoVoltarDoDownload(driver):
+    # Abrir uma nova aba
+    driver.execute_script("window.open('');")
+
+    # Alternar para a nova aba
+    driver.switch_to.window(driver.window_handles[1])
+
+    # Voltar para a primeira aba
+    driver.switch_to.window(driver.window_handles[0])
+
+    # Fechar a primeira aba
+    driver.close()
+
+    # Alternar para a aba que ficou aberta
+    driver.switch_to.window(driver.window_handles[0])
+
+    # Navegar para um site na aba restante
+    driver.get("https://app2.tcema.tc.br/PCA/login2.zul")
+
+    # Aguardar 2 segundos
+    time.sleep(1)
+
+    # Navegar para outro site na mesma aba
+    driver.get("https://app2.tcema.tc.br/PCA/visualizarestrutura.zul")
+    time.sleep(3)
+
+
 def criarDiretorioDeDownload():
     import os
 
@@ -207,13 +231,25 @@ def criarDiretorioDeDownload():
     os.makedirs(download_directory, exist_ok=True)
 
     return download_directory
-def pecorrerAteCidadeNovamente(driver,posicaoCidadeNaPaginacao,ondemDaCidadeNoLayout):
+def pecorrerAteCidadeNovamente(driver,posicaoCidadeNaPaginacao,ondemDaCidadeNoLayout,conexaoDB,verificarNoBancoDeDados=False):
     botaoMostrarCidade(driver)
+    print('posicaoCidadeNaPaginacao', posicaoCidadeNaPaginacao, 'ondemDaCidadeNoLayout',ondemDaCidadeNoLayout )
     if posicaoCidadeNaPaginacao != 1:
-        for k in range(posicaoCidadeNaPaginacao):
+        for k in range(posicaoCidadeNaPaginacao-1):
+            time.sleep(1)
+            print('--------------------Avançou pagina', k, posicaoCidadeNaPaginacao)
             avancarListaCidades(driver)
+
     cidadeSelecionada = clickSelecaoCidade(driver, ondemDaCidadeNoLayout)
+    print(cidadeSelecionada)
+    if verificarNoBancoDeDados:
+        idCidade = SQLcidade.inserir_cidade(conexaoDB, cidadeSelecionada)
+        return idCidade
+    else:
+        return []
 def novaJanelaParaExecutar(parametros):
+    print(parametros)
+
     diretorio = criarDiretorioDeDownload()
     link = "https://app2.tcema.tc.br/PCA/visualizarestrutura.zul"
     chrome_options = webdriver.ChromeOptions()
@@ -224,30 +260,40 @@ def novaJanelaParaExecutar(parametros):
         "safebrowsing.enabled": True  # Habilitar navegação segura
     }
     chrome_options.add_experimental_option("prefs", prefs)
+    chrome_options.add_argument("--headless")
 
     # Inicializar o ChromeDriver com as opções
     driver = webdriver.Chrome(options=chrome_options)
     #driver.set_window_size(2000, 800);
     driver.set_window_size(800, 1000);
     driver.get(link)
-    time.sleep(5)  # delay
+    time.sleep(2)  # delay
 
+    # conexao Banco De Dados
+    conexaoDB = DB.create_connection()
 
     posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout, posicaoAnoNoLayout = parametros
 
 
     sairEvoltarParaPaginaPrincipal(driver)
-    pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout)
+    idCidade = pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout,conexaoDB,True)
     botaoMostrarAnos(driver)
+    time.sleep(0.5)
     anoSelecionado = clickSelecaoDoAno(driver, posicaoAnoNoLayout)
-    time.sleep(5)
-    # conexao Banco De Dados
-    conexaoDB = DB.create_connection()
-    #resultadoVerificacaoExistencia = verificarEclickDeEnviar(driver, conexaoDB, idCidadeAnoStatus)
-    time.sleep(5)
+    idAno = SQLano.inserir_ano(conexaoDB, anoSelecionado)
+    valoresCidadeAnoStatus = [idCidade, idAno]
 
+    verificarSeExisteEjaFinalizado = SQLcidadeAnoStatus.cidadeAnoStatus_existeStatus(conexaoDB, valoresCidadeAnoStatus)
+    if not verificarSeExisteEjaFinalizado:
+        idCidadeAnoStatus = SQLcidadeAnoStatus.inserir_cidadeAnoStatus(conexaoDB, valoresCidadeAnoStatus)
+        resultadoVerificacaoExistencia = verificarEclickDeEnviar(driver, conexaoDB, idCidadeAnoStatus);
+        if not resultadoVerificacaoExistencia:
+            print('Não Possui a informação')
+        else:
+            #segundaTela.acessarSegundaTela(driver, diretorio)
+            #print('Acessou as informações')
+            return []
 
-    print(parametros)
 acessarPaginaPrincipal()
 
 

@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 from bs4 import BeautifulSoup
 from lxml import etree
 import time
@@ -24,28 +25,30 @@ def acessarSegundaTela(driver,diretorio):
     else:
         print("Nenhum arquivo foi baixado dentro do tempo limite.")
     '''
-    voltarParaPaginaPrincipal(driver)
-    '''
+    #voltarParaPaginaPrincipal(driver)
+
     resultadoTabela = indentificarSegundaTabela(driver)
     for tipoId, (tipoPrincipal, todosOsSubTipos) in enumerate(resultadoTabela.items(), 1):
         for subTipoId, subTipo in enumerate(todosOsSubTipos, 1):
+            '''
             print(f"Posição pai: {tipoId}")
             print(f"Nome Pai: {tipoPrincipal}")
             print(f"Posição Filho: {subTipoId}")
             print(f"Nome Filho: {subTipo.strip()}")
             print("-" * 100)
+            '''
             numeroTabela = str(tipoId)
             numeroLinhaDaTabela = str(subTipoId)
             #numeroTabela = str(4)
             #numeroLinhaDaTabela = str(1)
-            print(numeroTabela,numeroLinhaDaTabela)
             stringPath = f'/html/body/div/div[4]/div[2]/div/div/div/div[2]/div/div/div/div[2]/div[2]/div/table/tbody[1]/tr[{numeroTabela}]/td/div/div/div[3]/table/tbody[1]/tr[{numeroLinhaDaTabela}]/td[4]/div/button'
-            print(stringPath)
-            print("-" * 100)
+
             abrirBoxDeArquivosParaBaixar(driver,stringPath)
 
             fecharBoxDeArquivosParaBaixar(driver)
-    '''
+
+    driver.quit()
+
     return
 def indentificarSegundaTabela(driver):
     soup = transformarDriveEmTextoHtml(driver)
@@ -145,13 +148,9 @@ def fecharBoxDeArquivosParaBaixar(driver):
         return False
 
 def verificarSeExisteBoxDeErro(driver):
-    print('Esperando')
 
     try:
-        #boxErro = driver.find_element(By.XPATH, "/html/body/div[3]")
         button = driver.find_element(By.XPATH, "//button[text()='OK']")
-        print('Aqui')
-        #closeBoxErro = driver.find_element(By.XPATH, "/html/body/div[3]/div[1]/div")
         button.click()
         return True
     except NoSuchElementException:
