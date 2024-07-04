@@ -9,6 +9,9 @@ from ePCA.Model import cidadeAnoSatus as SQLcidadeAnoStatus
 from ePCA.Model import cidade as SQLcidade
 from ePCA.Model import ano as SQLano
 from ePCA.Model import db as DB
+import numpy as np
+import concurrent.futures
+
 
 def acessarPaginaPrincipal():
     diretorio = criarDiretorioDeDownload()
@@ -26,9 +29,10 @@ def acessarPaginaPrincipal():
 
     # Inicializar o ChromeDriver com as opções
     driver = webdriver.Chrome(options=chrome_options)
-    driver.set_window_size(800, 1000);
+    driver.set_window_size(2000, 800);
+    #driver.set_window_size(800, 1000);
     driver.get(link)
-    time.sleep(2) #delay
+    time.sleep(5) #delay
 
     #conexao Banco De Dados
     conexaoDB = DB.create_connection()
@@ -36,20 +40,21 @@ def acessarPaginaPrincipal():
     resultadoQuantidadeDeNomeDeCidadeNoLayout = quantidadeDeNomeDeCidadeNoLayout(driver)
     quantidadePaginacao = int(quantidadePaginacaoCidade(driver))
 
-    for i in range(quantidadePaginacao):
-        if i != 0:
-            print(i)
+    for paginaCidade in range(quantidadePaginacao):
+        if paginaCidade != 0:
+            print(paginaCidade)
             sairEvoltarParaPaginaPrincipal(driver)
             botaoMostrarCidade(driver)
-            for k in range(i):
+            for k in range(paginaCidade):
                 avancarListaCidades(driver)
 
-        for i in range(resultadoQuantidadeDeNomeDeCidadeNoLayout):
-            posicaoElemento = i+1
+        for posicaoNomeNaLista in range(resultadoQuantidadeDeNomeDeCidadeNoLayout):
+            posicaoElemento = posicaoNomeNaLista+1
             if posicaoElemento != 1:
                 botaoMostrarCidade(driver)
 
-            cidadeSelecionada = clickSelecaoCidade(driver,2)
+            cidadeSelecionada = clickSelecaoCidade(driver,posicaoElemento)
+            #cidadeSelecionada = clickSelecaoCidade(driver,2)
             idCidade = SQLcidade.inserir_cidade(conexaoDB,cidadeSelecionada)
 
 
@@ -57,7 +62,26 @@ def acessarPaginaPrincipal():
             time.sleep(0.5)  # delay
             botaoMostrarAnos(driver)
             resultadoQuantidadeDeAnosNoLayout = quantidadeDeAnosNoLayout(driver)
+            arraySequencial = np.arange(1, resultadoQuantidadeDeAnosNoLayout + 1)
 
+            parametros = [(paginaCidade + 1, posicaoNomeNaLista + 1, int(num)) for num in arraySequencial]
+
+
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                result = executor.map(novaJanelaParaExecutar, parametros)
+
+            posicaoCidadeNaPaginacao = paginaCidade + 1
+            ondemDaCidadeNoLayout = posicaoNomeNaLista + 1
+
+            #Abrir umas noba aba e fechar a atinga e rodar
+            sairEvoltarParaPaginaPrincipal(driver)
+            pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout)
+
+            '''
+            for param in parametros:
+                print(param)
+            '''
+            '''
             for j in range(resultadoQuantidadeDeAnosNoLayout):
                 posicaoElementoAno = j + 1
                 if posicaoElementoAno != 1:
@@ -74,12 +98,17 @@ def acessarPaginaPrincipal():
                 else:
 
                     idCidadeAnoStatus = SQLcidadeAnoStatus.inserir_cidadeAnoStatus(conexaoDB,valoresCidadeAnoStatus)
+                    
                     resultadoVerificacaoExistencia = verificarEclickDeEnviar(driver,conexaoDB,idCidadeAnoStatus);
 
                     if not resultadoVerificacaoExistencia:
                         print('Não Possui a informação')
                     else:
                         segundaTela.acessarSegundaTela(driver,diretorio)
+                        sairEvoltarParaPaginaPrincipal(driver)
+                    
+            '''
+
 
 
     #botaoMostrarAnos(driver)
@@ -178,6 +207,47 @@ def criarDiretorioDeDownload():
     os.makedirs(download_directory, exist_ok=True)
 
     return download_directory
+def pecorrerAteCidadeNovamente(driver,posicaoCidadeNaPaginacao,ondemDaCidadeNoLayout):
+    botaoMostrarCidade(driver)
+    if posicaoCidadeNaPaginacao != 1:
+        for k in range(posicaoCidadeNaPaginacao):
+            avancarListaCidades(driver)
+    cidadeSelecionada = clickSelecaoCidade(driver, ondemDaCidadeNoLayout)
+def novaJanelaParaExecutar(parametros):
+    diretorio = criarDiretorioDeDownload()
+    link = "https://app2.tcema.tc.br/PCA/visualizarestrutura.zul"
+    chrome_options = webdriver.ChromeOptions()
+    prefs = {
+        "download.default_directory": diretorio,  # Altere para o caminho desejado
+        "download.prompt_for_download": False,  # Impedir pop-up de download
+        "download.directory_upgrade": True,  # Garantir que o diretório é atualizado
+        "safebrowsing.enabled": True  # Habilitar navegação segura
+    }
+    chrome_options.add_experimental_option("prefs", prefs)
+
+    # Inicializar o ChromeDriver com as opções
+    driver = webdriver.Chrome(options=chrome_options)
+    #driver.set_window_size(2000, 800);
+    driver.set_window_size(800, 1000);
+    driver.get(link)
+    time.sleep(5)  # delay
+
+
+    posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout, posicaoAnoNoLayout = parametros
+
+
+    sairEvoltarParaPaginaPrincipal(driver)
+    pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout)
+    botaoMostrarAnos(driver)
+    anoSelecionado = clickSelecaoDoAno(driver, posicaoAnoNoLayout)
+    time.sleep(5)
+    # conexao Banco De Dados
+    conexaoDB = DB.create_connection()
+    #resultadoVerificacaoExistencia = verificarEclickDeEnviar(driver, conexaoDB, idCidadeAnoStatus)
+    time.sleep(5)
+
+
+    print(parametros)
 acessarPaginaPrincipal()
 
 
