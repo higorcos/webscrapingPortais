@@ -5,7 +5,7 @@ import time
 import os
 from Ultils import gerarArquivo, downloadArquivos
 from Ultils.pastas.pastasDocumentosDosModulos import andamento as criarPastaJson
-from Licitacao_and_Contrato.contrato import detalhesContrato
+from Licitacao_Siganet.contrato import detalhesContrato
 import concurrent.futures
 
 directoryGlobal = ''

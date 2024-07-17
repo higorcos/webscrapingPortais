@@ -1,4 +1,4 @@
-from Licitacao_and_Contrato.contrato import tabelasDetalhesContrato
+from Licitacao_Siganet.contrato import tabelasDetalhesContrato
 from Ultils.pastas.pastasModulos import contrato as  criarPasta
 from selenium.webdriver.chrome.options import Options
 from Ultils import gerarArquivo

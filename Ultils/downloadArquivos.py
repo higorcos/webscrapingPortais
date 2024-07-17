@@ -4,10 +4,9 @@ import re
 from bs4 import BeautifulSoup
 
 def link(link,file_dir):
-    print('\t\t ------ AQUI ACESSO ')
 
     # Verificar se o link termina com uma extensão de arquivo comum (por exemplo, .pdf, .doc, .xlsx, etc.)
-    if link.endswith(('.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv', '.txt')):
+    if link.endswith(('.pdf', '.doc', '.docx', '.xls', '.xlsx', '.csv', '.txt', '.zip')):
         # Baixar o arquivo
         try:
             headers = {

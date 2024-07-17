@@ -1,28 +1,20 @@
-from Licitacao_and_Contrato.licitacao import tabelasDetalhesLicitação
-from Ultils.pastas.pastasModulos import licitacao as criarPasta
-from Ultils import gerarArquivo
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import os
 
 
-
-def mostrarDetalhe(driver,directoryInformation,link):
+def tabelaDeUnidades(driver, directory, link):
     dadosTabela = {}
-    print("Acessando: ", link)
-    directory = directoryInformation["licitacaoFolder"]
-    # Criar uma pasta geral
-
 
     try:
         if not os.path.exists(directory):
             os.makedirs(directory)
         else:
             print(f"A pasta '{directory}' já existe.")
+
     except Exception as e:
         print(f"\n\n\tErro ao criar a pasta '{directory}': {e} \n\n")
-
 
     # Navegar até a página
     driver.get(link)
@@ -34,16 +26,16 @@ def mostrarDetalhe(driver,directoryInformation,link):
     # Analisar o HTML usando BeautifulSoup
     soup = BeautifulSoup(html, "html.parser")
 
-    #Informações das licitações
+    # Informações das licitações
     selectDivs = soup.select('.form-group')
-
+    '''
     for input in selectDivs:
-
-        if (input.find("input")):
+        if (input.find("label")):
             chave = input.find("label").text
-            valor = input.find("input")["value"]
+            valor = input.find("span").text
+            print(chave,": ",valor.strip())
             dadosTabela[chave] = []
-            dadosTabela[chave].append(valor)
+            dadosTabela[chave].append(valor.strip())
 
         else:
             if input.find("label"):
@@ -76,44 +68,27 @@ def mostrarDetalhe(driver,directoryInformation,link):
 
 
 
-    gerarArquivo.criarCSV(dadosTabela, namefolder + '/Detalhes da licitação')
-    gerarArquivo.editarCSV(dadosTabela, directoryInformation["licitacaoFolder"]+'/Todas as licitações')
+    #gerarArquivo.criarCSV(dadosTabela, namefolder + '/Detalhes da licitação')
+    #gerarArquivo.editarCSV(dadosTabela, directory+'/Todas as licitações')
     #time.sleep(2)
 
-    tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder)
+    #tabelasDetalhesLicitação.verificarSeExisteTabelas(soup, namefolder)
+    '''
 
 
-
-def runMostrarDetalhe():
-
-    #link = "https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136499";
-    link="https://transparencia.balsas.ma.gov.br/acessoInformacao/licitacao/tce/detalhes/991136323"
-    nomePortal = "Mirador";
-    tipoPortal = "PM";
-
-    directoryInformation = {
-        "mainFolder": "Downloads-" + nomePortal + "-" + tipoPortal + "",
-        "licitacaoFolder": "Licitações e Contratos",
-    }
+def run():
+    print('_____adasd')
+    link = "https://app2.tcema.tc.br/PCA/visualizarestrutura.zul"
+    nomePasta = "arquivos";
 
     # Criar uma nova instância do driver do Chrome
-
     driver = webdriver.Chrome()
     driver.set_window_size(800, 600);
-
     driver.get(link)
-
-    driver2 = webdriver.Chrome()
     time.sleep(2)
-    driver2.get(link)
 
-    #mostrarDetalhe(driver, directoryInformation, link)
+    #tabelaDeUnidades(driver, nomePasta, link)
     # Fechar o navegador
     driver.quit()
 
-#runMostrarDetalhe();
-
-
-
-
-
+run();
