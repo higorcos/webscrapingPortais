@@ -1,11 +1,39 @@
-from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from Ultils import gerarArquivo,downloadArquivos
 from selenium.webdriver.common.by import By
+from selenium import webdriver
 from bs4 import BeautifulSoup
+import concurrent.futures
 import time
 import os
-from Ultils import gerarArquivo,downloadArquivos
 
 
+def pecorrerLinhas(row):
+    if not row:  # Verifica se a linha está vazia
+        print('------')
+        return ['', '', '', '']
+
+    print(f"{row} - {time.strftime('%X')}")
+    numberFile = row[0]
+    dateFile = row[1]
+    dateFileNewFormat = dateFile.replace('/', '-')  # remover barra
+    link = row[3]
+
+    number0 = str(i)
+    # Criar uma pasta individual para o arquivo baixado dentro da pasta de downloads
+    newDir = "Nº " + numberFile + " DATA " + dateFileNewFormat
+    file_dir = os.path.join(download_dir, newDir)
+    if not os.path.exists(file_dir):
+        os.makedirs(file_dir)
+
+    # Verificar se encontrou a tag <a>
+    if link:
+        statusDownload = downloadArquivos.link(link, file_dir)
+    else:
+        print("Link não encontrado")
+        statusDownload = {'status Donwload': "Link não foi informado"}
+
+    return [numberFile,dateFile,statusDownload['status Donwload'],link]
 
 linkPortal = "https://parnarama.diariooficialmunicipal.com/?p=edicao";
 dnsPortal = "https://parnarama.diariooficialmunicipal.com/"
@@ -20,8 +48,9 @@ download_dir = tipoArquivosDownloads+"-"+nomePortal+'-'+tipoPortal;
 if not os.path.exists(download_dir):
     os.makedirs(download_dir)
 
-# Criar uma nova instância do driver do Chrome
-driver = webdriver.Chrome()
+chrome_options = Options()
+chrome_options.add_argument('--headless')  # Ativa o modo headless
+driver = webdriver.Chrome(options=chrome_options)
 
 # Definir o tamanho da janela
 driver.set_window_size(800, 600);
@@ -66,48 +95,25 @@ for i in range(0,numberPages):
                 cell_contents.append(cell.get_text(strip=True))
         all_rows.append(cell_contents)
 
-    for row in all_rows:
-        if not row:  # Verifica se a linha está vazia
-            print('------')
-            continue
-        print(row)
+        print('Antes')
 
-        numberFile = row[0]
-        dateFile = row[1]
-        dateFileNewFormat = dateFile.replace('/','-') #remover barra
-        link = row[3]
+    with concurrent.futures.ThreadPoolExecutor(6) as executor:
+        result = executor.map(pecorrerLinhas, all_rows)
 
-
-        number0 = str(i)
-        # Criar uma pasta individual para o arquivo baixado dentro da pasta de downloads
-        newDir = "Nº " + numberFile + " DATA " + dateFileNewFormat
-        file_dir = os.path.join(download_dir, newDir)
-        if not os.path.exists(file_dir):
-            os.makedirs(file_dir)
+    for dados in result:
+        dadosTabela["Nº EDIÇÃO"].append(dados[0])
+        dadosTabela["DATA"].append(dados[1])
+        dadosTabela["STATUS"].append(dados[2])
+        dadosTabela["LINK"].append(dados[3])
+    print('Depois')
 
 
-        # Verificar se encontrou a tag <a>
-        if link:
-            statusDownload = downloadArquivos.link(link, file_dir)
-        else:
-            print("Link não encontrado")
-            statusDownload = {'status Donwload': "Link não foi informado"}
-
-
-        dadosTabela["Nº EDIÇÃO"].append(numberFile)
-        dadosTabela["DATA"].append(dateFile)
-        dadosTabela["STATUS"].append(statusDownload['status Donwload'])
-        dadosTabela["LINK"].append(link)
-
-
-    
 
     if numberPages != i:
         button = driver.find_element(By.CSS_SELECTOR, ".page-next a");
         button.click();
+        print('Mudou')
 
 gerarArquivo.criarCSV(dadosTabela, download_dir);
 # Fechar o navegador
 driver.quit()
-
-
