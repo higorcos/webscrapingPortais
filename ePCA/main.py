@@ -4,6 +4,9 @@ from lxml import etree
 import time
 import os
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
 from ePCA import tela02 as segundaTela
 from ePCA.Model import cidadeAnoSatus as SQLcidadeAnoStatus
 from ePCA.Model import cidade as SQLcidade
@@ -65,15 +68,17 @@ def acessarPaginaPrincipal():
             parametros = [(paginaCidade + 1, posicaoNomeNaLista + 1, int(num)) for num in arraySequencial]
 
 
-            with concurrent.futures.ThreadPoolExecutor() as executor:
+            with concurrent.futures.ThreadPoolExecutor(3) as executor:
                 result = executor.map(novaJanelaParaExecutar, parametros)
 
+            time.sleep(5)
             posicaoCidadeNaPaginacao = paginaCidade + 1
             ondemDaCidadeNoLayout = posicaoNomeNaLista + 1
 
             #Abrir umas noba aba e fechar a atinga e rodar
             #sairEvoltarParaPaginaPrincipal(driver)
             pegarNovoTokenQuandoVoltarDoDownload(driver)
+            time.sleep(1)
             #print('Aqui depois de sair EvoltarParaPaginaPrincipal ')
             pecorrerAteCidadeNovamente(driver, posicaoCidadeNaPaginacao, ondemDaCidadeNoLayout,conexaoDB,False)
             #print('Depois de pecorrer ate a cidade novamente ')
@@ -112,19 +117,49 @@ def acessarPaginaPrincipal():
 
     #time.sleep(10)
     #driver.quit()
+
+def click_element_with_retries(driver, xpath, delay=3,retries=3):
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Espera até que o elemento esteja presente
+            element = WebDriverWait(driver, delay).until(
+                EC.presence_of_element_located((By.XPATH, xpath))
+            )
+            element.click()
+            time.sleep(delay)
+
+            return
+        except Exception as e:
+            attempts += 1
+            print(f"Erro na tentativa {attempts}: {e}")
+            time.sleep(delay)
+    raise Exception(f"Elemento não encontrado após {retries} tentativas")
 def botaoMostrarCidade(driver):
+
+    xpath = '/html/body/div/div[4]/div[2]/div/div/div/div[1]/div/div[2]/div[1]/span[2]/a'
+
+    click_element_with_retries(driver,xpath)
+    '''
+    time.sleep(1)
     buttonAcessarNomeCidade = driver.find_element(By.XPATH,'/html/body/div/div[4]/div[2]/div/div/div/div[1]/div/div[2]/div[1]/span[2]/a')
     buttonAcessarNomeCidade.click()
     time.sleep(0.5)
+    '''
     return
 def quantidadePaginacaoCidade(driver):
     buttonParaAvancarNomeDasCidades = driver.find_element(By.XPATH,'/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[1]/div/ul/li[3]/span')
     value = buttonParaAvancarNomeDasCidades.text
     return value.replace(" ", "").replace("/", "")
 def avancarListaCidades(driver):
+    xpath = '/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[1]/div/ul/li[4]/a'
+    click_element_with_retries(driver, xpath)
+    '''
     buttonParaAvancarNomeDasCidades = driver.find_element(By.XPATH, '/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[1]/div/ul/li[4]/a')
     buttonParaAvancarNomeDasCidades.click()
-    time.sleep(0.2)
+    '''
+    time.sleep(0.5)
+    return
 def quantidadeDeNomeDeCidadeNoLayout(driver):
     soup = transformarDriveEmTextoHtml(driver)
     # Pegando o numero de cidades que é mostrado na listagem
@@ -134,15 +169,42 @@ def quantidadeDeNomeDeCidadeNoLayout(driver):
 
     return listNames.__len__()
 def clickSelecaoCidade(driver,posicaoElemento):
-    # xpath Primeiro - '/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[4]/table/tbody[1]/tr[1]/td/div'
-    # xpath ultimo - '/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[4]/table/tbody[1]/tr[5]/td/div'
+    time.sleep(1)
+    retries =3
+    delay = 1
     xPath = f'/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[4]/table/tbody[1]/tr[{str(posicaoElemento)}]/td/div'
+
+    attempts = 0
+    while attempts < retries:
+        try:
+            # Espera até que o elemento esteja presente
+            element = WebDriverWait(driver, delay).until(
+                EC.presence_of_element_located((By.XPATH, xPath))
+            )
+            cidadeSelecionada = element.text
+            element.click()
+            time.sleep(3)
+
+            print(f'CIDADE SELECIONADA {cidadeSelecionada}')
+            return [cidadeSelecionada]
+        except Exception as e:
+            attempts += 1
+            print(f"Erro na tentativa {attempts}: {e}")
+            time.sleep(delay)
+    raise Exception(f"Elemento não encontrado após {retries} tentativas")
+
+
+    '''
+    time.sleep(1)
+    xPath = f'/html/body/div[2]/div/table/tbody/tr/td/table/tbody/tr/td/div/div[4]/table/tbody[1]/tr[{str(posicaoElemento)}]/td/div'
+    
     selecionarNomeEspecificoDeUmaCidade = driver.find_element(By.XPATH,xPath)
     cidadeSelecionada = selecionarNomeEspecificoDeUmaCidade.text
     selecionarNomeEspecificoDeUmaCidade.click()
-    time.sleep(0.7)
+    time.sleep(1)
     #print('\t Cidade Selecionada: ',cidadeSelecionada)
     return [cidadeSelecionada]
+    '''
 def quantidadeDeAnosNoLayout(driver):
     soup = transformarDriveEmTextoHtml(driver)
     listaAnos = soup.select('.z-combobox-content')  # Anos
@@ -236,7 +298,7 @@ def pecorrerAteCidadeNovamente(driver,posicaoCidadeNaPaginacao,ondemDaCidadeNoLa
     print('posicaoCidadeNaPaginacao', posicaoCidadeNaPaginacao, 'ondemDaCidadeNoLayout',ondemDaCidadeNoLayout )
     if posicaoCidadeNaPaginacao != 1:
         for k in range(posicaoCidadeNaPaginacao-1):
-            time.sleep(1)
+            time.sleep(0.8)
             print('--------------------Avançou pagina', k, posicaoCidadeNaPaginacao)
             avancarListaCidades(driver)
 
@@ -260,7 +322,7 @@ def novaJanelaParaExecutar(parametros):
         "safebrowsing.enabled": True  # Habilitar navegação segura
     }
     chrome_options.add_experimental_option("prefs", prefs)
-    chrome_options.add_argument("--headless")
+    #chrome_options.add_argument("--headless")
 
     # Inicializar o ChromeDriver com as opções
     driver = webdriver.Chrome(options=chrome_options)
@@ -290,7 +352,7 @@ def novaJanelaParaExecutar(parametros):
         if not resultadoVerificacaoExistencia:
             print('Não Possui a informação')
         else:
-            #segundaTela.acessarSegundaTela(driver, diretorio)
+            segundaTela.acessarSegundaTela(driver, diretorio)
             #print('Acessou as informações')
             return []
 

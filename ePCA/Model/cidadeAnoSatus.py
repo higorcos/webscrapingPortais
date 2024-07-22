@@ -21,7 +21,6 @@ def cidadeAnoStatus_existe(conn,ano):
     if result is not None:
         result = result[0]
     return result
-
 def cidadeAnoStatus_existeStatus(conn,ano):
     sql = '''SELECT CidadeAnoStatus.idCidadeAnoStatus FROM CidadeAnoStatus WHERE idCidade= ? AND idAno = ? AND status='finalizado' '''
     cur = conn.cursor()
@@ -42,7 +41,6 @@ def selecionar_cidadesAnoStatus(conn):
 
     rows = cur.fetchall()
     return rows
-
 def selecionar_cidadesAnoStatusEspecifico(conn,dados):
     """ Query all rows in the employees table """
     cur = conn.cursor()
@@ -66,7 +64,6 @@ def selecionar_cidadesAnoStatusEspecifico(conn,dados):
     rows = cur.fetchall()
 
     return rows
-
 def selecionar_cidadesAnoStatusEspecificoID(conn,dados):
     """ Query all rows in the employees table """
     cur = conn.cursor()
@@ -99,7 +96,6 @@ def update_cidadesAnoStatus(conn, employee):
     cur.execute(sql, employee)
     conn.commit()
     print('Atualizou status ')
-
 def main():
     database = "test2.db"
 
@@ -120,7 +116,6 @@ def main():
 
     else:
         print("Error! Cannot create the database connection.")
-
 
 if __name__ == '__main__':
     main()

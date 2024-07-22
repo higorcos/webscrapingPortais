@@ -26,17 +26,17 @@ def acessarSegundaTela(driver,diretorio):
         print("Nenhum arquivo foi baixado dentro do tempo limite.")
     '''
     #voltarParaPaginaPrincipal(driver)
-
+    '''
     resultadoTabela = indentificarSegundaTabela(driver)
     for tipoId, (tipoPrincipal, todosOsSubTipos) in enumerate(resultadoTabela.items(), 1):
         for subTipoId, subTipo in enumerate(todosOsSubTipos, 1):
-            '''
-            print(f"Posição pai: {tipoId}")
-            print(f"Nome Pai: {tipoPrincipal}")
-            print(f"Posição Filho: {subTipoId}")
-            print(f"Nome Filho: {subTipo.strip()}")
-            print("-" * 100)
-            '''
+        
+            #print(f"Posição pai: {tipoId}")
+            #print(f"Nome Pai: {tipoPrincipal}")
+            #print(f"Posição Filho: {subTipoId}")
+            #print(f"Nome Filho: {subTipo.strip()}")
+            #print("-" * 100)
+            
             numeroTabela = str(tipoId)
             numeroLinhaDaTabela = str(subTipoId)
             #numeroTabela = str(4)
@@ -46,7 +46,7 @@ def acessarSegundaTela(driver,diretorio):
             abrirBoxDeArquivosParaBaixar(driver,stringPath)
 
             fecharBoxDeArquivosParaBaixar(driver)
-
+    '''
     driver.quit()
 
     return
